@@ -11,9 +11,10 @@ export const VolumeGainers: React.FC = () => {
   if (isLoading) return <SkeletonCard />;
   if (error) return <ErrorMessage message={error.message} onRetry={refetch} />;
 
-  const gainers = data?.data?.slice(0, 10) || [];
+  const gainers = data?.data || [];
 
-  const chartData = gainers.map((item: any) => ({
+  // Show top 10 in chart, but all in table
+  const chartData = gainers.slice(0, 10).map((item: any) => ({
     name: item.symbol || item.symbolName || 'N/A',
     volume: parseInt(item.volume || item.tradedQuantity || 0),
     value: parseFloat(item.value || item.totalTradedValue || 0),
@@ -49,8 +50,9 @@ export const VolumeGainers: React.FC = () => {
       </div>
 
       <div className="mt-6 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
+        <div className="max-h-[400px] overflow-y-auto">
+          <table className="w-full text-sm">
+          <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0 z-10">
             <tr className="border-b border-gray-200 dark:border-gray-700">
               <th className="text-left py-2 px-4 font-semibold text-gray-700 dark:text-gray-300">Symbol</th>
               <th className="text-right py-2 px-4 font-semibold text-gray-700 dark:text-gray-300">Volume</th>
@@ -73,6 +75,7 @@ export const VolumeGainers: React.FC = () => {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </Card>
   );

@@ -9,6 +9,9 @@ import { VolumeGainers } from '@/components/VolumeGainers';
 import { MostActiveSecurities } from '@/components/MostActiveSecurities';
 import { OISpurts } from '@/components/OISpurts';
 import { CorporateAnnouncements } from '@/components/CorporateAnnouncements';
+import MarketStatus from '@/components/MarketStatus';
+import IndicesTable from '@/components/IndicesTable';
+import IndicesPerformanceChart from '@/components/IndicesPerformanceChart';
 import { RefreshCw, Clock, LogOut, User } from 'lucide-react';
 
 export default function Dashboard() {
@@ -163,8 +166,17 @@ export default function Dashboard() {
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="space-y-6">
+            {/* Market Status */}
+            <MarketStatus />
+
             {/* Indices Overview */}
             <IndicesOverview />
+
+            {/* Comprehensive Indices Table */}
+            <IndicesTable />
+
+            {/* Indices Performance Chart */}
+            <IndicesPerformanceChart />
 
             {/* Nifty Chart */}
             <NiftyChart />

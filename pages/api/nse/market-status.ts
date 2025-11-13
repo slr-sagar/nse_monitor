@@ -10,7 +10,7 @@ export default async function handler(
   }
 
   try {
-    const data = await fetchNSEData(NSE_ENDPOINTS.NIFTY_CHART);
+    const data = await fetchNSEData(NSE_ENDPOINTS.MARKET_STATUS);
     res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate');
     return res.status(200).json(data);
   } catch (error: any) {

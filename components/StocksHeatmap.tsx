@@ -11,29 +11,40 @@ export const StocksHeatmap: React.FC = () => {
   if (isLoading) return <SkeletonCard />;
   if (error) return <ErrorMessage message={error.message} onRetry={refetch} />;
 
-  // Parse heatmap data - it could be in different formats
+  // Parse heatmap data - handle the actual API response format
   let stocks: any[] = [];
 
-  if (data?.advance?.declines) {
-    // Format 1: advance/declines structure
-    stocks = [...(data.advance || []), ...(data.declines || [])];
-  } else if (data?.data) {
-    // Format 2: data array
+  if (data?.data && Array.isArray(data.data)) {
+    // Standard format: { data: [...] }
     stocks = data.data;
   } else if (Array.isArray(data)) {
-    // Format 3: direct array
+    // Direct array format
     stocks = data;
+  } else {
+    console.log('Unexpected heatmap data format:', data);
+    return <ErrorMessage message="Invalid data format received" onRetry={refetch} />;
   }
 
+  // Filter to get only stocks with proper data
+  const validStocks = stocks
+    .filter((stock: any) =>
+      stock &&
+      (stock.symbol || stock.symbolName) &&
+      stock.lastPrice !== undefined &&
+      stock.pChange !== undefined
+    )
+    .slice(0, 50);
+
   // Sort by absolute percentage change (highest volatility first)
-  const sortedStocks = stocks
-    .filter((stock: any) => stock && (stock.symbol || stock.symbolName))
-    .slice(0, 50)
-    .sort((a: any, b: any) => {
-      const aChange = Math.abs(parseFloat(a.pChange || a.percentChange || 0));
-      const bChange = Math.abs(parseFloat(b.pChange || b.percentChange || 0));
-      return bChange - aChange;
-    });
+  const sortedStocks = validStocks.sort((a: any, b: any) => {
+    const aChange = Math.abs(parseFloat(a.pChange || a.percentChange || 0));
+    const bChange = Math.abs(parseFloat(b.pChange || b.percentChange || 0));
+    return bChange - aChange;
+  });
+
+  if (sortedStocks.length === 0) {
+    return <ErrorMessage message="No stock data available" onRetry={refetch} />;
+  }
 
   const getColorIntensity = (change: number): string => {
     const absChange = Math.abs(change);
@@ -66,7 +77,7 @@ export const StocksHeatmap: React.FC = () => {
   return (
     <Card title="NIFTY 50 Stocks Heatmap" subtitle="Color intensity shows price movement strength">
       {/* Legend */}
-      <div className="mb-4 flex items-center justify-center gap-4 text-xs">
+      <div className="mb-4 flex items-center justify-center gap-4 text-xs flex-wrap">
         <div className="flex items-center">
           <div className="w-4 h-4 bg-red-600 rounded mr-1"></div>
           <span className="text-gray-600 dark:text-gray-400">Strong Decline (&gt;3%)</span>
@@ -94,6 +105,7 @@ export const StocksHeatmap: React.FC = () => {
         {sortedStocks.map((stock: any, idx: number) => {
           const change = parseFloat(stock.pChange || stock.percentChange || 0);
           const symbol = (stock.symbol || stock.symbolName || 'N/A').substring(0, 10);
+          const price = parseFloat(stock.lastPrice || stock.last || 0);
 
           return (
             <div
@@ -116,14 +128,11 @@ export const StocksHeatmap: React.FC = () => {
                 <div className="bg-gray-900 text-white text-xs rounded-lg py-2 px-3 shadow-lg whitespace-nowrap">
                   <div className="font-bold">{symbol}</div>
                   <div className="mt-1">
-                    LTP: ₹{parseFloat(stock.ltp || stock.lastPrice || 0).toFixed(2)}
+                    LTP: ₹{price.toFixed(2)}
                   </div>
                   <div>
                     Change: {change > 0 ? '+' : ''}{change.toFixed(2)}%
                   </div>
-                  {stock.volume && (
-                    <div>Vol: {(parseInt(stock.volume) / 1000).toFixed(0)}K</div>
-                  )}
                 </div>
               </div>
             </div>
