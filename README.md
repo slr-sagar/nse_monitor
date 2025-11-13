@@ -19,11 +19,6 @@ A real-time stock market dashboard for NSE (National Stock Exchange of India) bu
 
 The dashboard is protected with a login system. Only authorized users can access the market data.
 
-### Authorized Users:
-- aakashk@skyliferesearch.com
-- sagark@skyliferesearch.com
-- mahimg@skyliferesearch.com
-
 ### Login Flow:
 1. Visit the application URL
 2. You'll be redirected to the login page
